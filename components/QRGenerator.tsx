@@ -63,7 +63,7 @@ export default function QRGenerator({ className = '' }: QRGeneratorProps) {
           errorCorrectionLevel: 'M'
         });
         setQrCodeUrl(url);
-      } catch (error) {
+      } catch {
         setError('QRコードの生成に失敗しました。');
         setQrCodeUrl('');
       } finally {
