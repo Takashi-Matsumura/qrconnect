@@ -1,144 +1,305 @@
 # QRConnect
 
-QRConnect is a Progressive Web App (PWA) that enables seamless data transfer between smartphones and PCs using QR codes. It provides a responsive design that automatically switches between QR code generation on mobile devices and QR code reading on desktop computers.
+QRConnectは、QRコードを使用してスマートフォンとPC間でシームレスなデータ転送を可能にするプログレッシブウェブアプリ（PWA）です。レスポンシブデザインにより、モバイルデバイスでのQRコード生成とデスクトップでのQRコード読み取りを自動的に切り替え、大容量データ転送のための分割QR機能などの高度な機能を提供します。
 
-## Features
+## 機能
 
-### Core Functionality
-- **QR Code Generation**: Convert text to QR codes on mobile devices
-- **QR Code Reading**: Scan QR codes using PC camera
-- **Responsive Design**: Automatic device detection and appropriate UI display
-- **PWA Support**: Install as a native app on both mobile and desktop
+### 主要機能
+- **QRコード生成**: モバイルデバイスでテキストをQRコードに変換
+- **QRコード読み取り**: PCカメラを使用したQRコードスキャン
+- **分割QR対応**: 大容量データ（400文字以上）を複数のQRコードに自動分割
+- **レスポンシブデザイン**: デバイス自動検出と適切なUI表示
+- **PWA対応**: モバイル・デスクトップ両方でネイティブアプリとしてインストール可能
+- **日本語サポート**: 日本語テキストエンコーディングに最適化
 
-### Mobile Features
-- QR code generation with real-time preview
-- Character limit validation (2000 characters recommended)
-- Test text generation for validation
-- Tap-to-expand QR code modal
-- Tab navigation between generator and help pages
+### モバイル機能
+- リアルタイムプレビュー付きQRコード生成
+- 文字数制限検証（単一QR：400文字、分割モード：無制限）
+- 大容量データ用の自動分割モード
+- 様々な文字数サンプルでのテストテキスト生成
+- より良い視認性のためのタップ拡大QRコードモーダル
+- 生成画面とヘルプページ間のタブナビゲーション
+- 前へ/次へコントロール付き分割QRナビゲーション
 
-### Desktop Features
-- Camera-based QR code scanning
-- Real-time QR code detection
-- Clipboard integration for scanned data
+### デスクトップ機能
+- カメラベースのQRコードスキャン
+- リアルタイムQRコード検出
+- マルチQR受信と自動データ再構築
+- 分割QR進捗追跡
+- スキャンしたデータのクリップボード統合
 
-### Technical Features
-- **Framework**: Next.js 15 with App Router
-- **UI Library**: React 19 with TypeScript
-- **Styling**: Tailwind CSS v4
-- **QR Generation**: `qrcode` library
-- **QR Reading**: `@zxing/library`
-- **PWA**: Service Worker and Web App Manifest
+### 高度な機能
+- **データ分割**: 大容量テキストの400文字セグメントへの自動チャンク化
+- **チェックサム検証**: 各チャンクのデータ整合性確認
+- **順次スキャン**: マルチQRデータ受信のスマート処理
+- **日本語テキスト最適化**: 日本語コンテンツ用に最適化された文字エンコーディング
+- **包括的テスト**: 様々なユースケース用の組み込みテストデータ生成器
 
-## Getting Started
+### 技術仕様
+- **フレームワーク**: Next.js 15 with App Router
+- **UIライブラリ**: React 19 with TypeScript
+- **スタイリング**: Tailwind CSS v4
+- **QR生成**: カスタム最適化された`qrcode`ライブラリ
+- **QR読み取り**: マルチQR対応`@zxing/library`
+- **PWA**: 高度なService WorkerとWeb App Manifest
+- **キャッシュ戦略**: Workboxによる包括的オフラインサポート
 
-### Prerequisites
-- Node.js 18.0 or later
-- npm, yarn, pnpm, or bun
+## はじめに
 
-### Installation
+### 前提条件
+- Node.js 18.0以降
+- npm、yarn、pnpm、またはbun
 
-1. Clone the repository:
+### インストール
+
+1. リポジトリをクローン:
 ```bash
 git clone https://github.com/yourusername/qrconnect.git
 cd qrconnect
 ```
 
-2. Install dependencies:
+2. 依存関係をインストール:
 ```bash
 npm install
-# or
+# または
 yarn install
-# or
+# または
 pnpm install
-# or
+# または
 bun install
 ```
 
-3. Run the development server:
+3. 開発サーバーを起動:
 ```bash
 npm run dev
-# or
+# または
 yarn dev
-# or
+# または
 pnpm dev
-# or
+# または
 bun dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. ブラウザで [http://localhost:3000](http://localhost:3000) を開く
 
-## Usage
+## 使用方法
 
-### Mobile Usage (QR Code Generation)
-1. Open the app on your smartphone
-2. Enter the text you want to transfer in the text area
-3. The QR code will be generated automatically
-4. Tap the QR code thumbnail to expand it for better visibility
-5. Use the PC camera to scan the QR code
+### モバイルでの使用（QRコード生成）
 
-### Desktop Usage (QR Code Reading)
-1. Open the app on your PC
-2. Allow camera access when prompted
-3. Point your camera at the QR code generated on your mobile device
-4. The scanned data will be displayed automatically
+#### 単一QRモード（400文字以下）
+1. スマートフォンでアプリを開く
+2. テキストエリアにテキスト（400文字まで）を入力
+3. QRコードが自動的に生成される
+4. QRコードサムネイルをタップして拡大表示
+5. PCのカメラでQRコードをスキャン
 
-### Additional Features
-- **Character Limit Validation**: The app validates text length and warns when approaching the 2000-character limit
-- **Test Text Generation**: Use the "テストテキスト生成" button to generate sample text for testing
-- **Help & Technical Information**: Access detailed documentation via the "ヘルプ・技術情報" tab on mobile
+#### 分割QRモード（400文字超過）
+1. 400文字を超えるテキストを入力
+2. アプリが自動的に分割モードに切り替わる
+3. 前へ/次へボタンで複数のQRコードをナビゲート
+4. PCで各QRコードを順次スキャン
+5. データが自動的に再構築される
 
-## Project Structure
+### デスクトップでの使用（QRコード読み取り）
+
+#### 単一QR受信
+1. PCでアプリを開く
+2. プロンプトでカメラアクセスを許可
+3. モバイルデバイスで生成されたQRコードにカメラを向ける
+4. スキャンしたデータが自動的に表示される
+
+#### マルチQR受信
+1. 分割シーケンスの最初のQRコードのスキャンを開始
+2. アプリが進捗を表示（例：「1/4受信済み」）
+3. 順番に後続のQRコードをスキャン
+4. すべてのチャンクを受信すると、データが自動的に結合される
+5. 完全なテキストが結果エリアに表示される
+
+### その他の機能
+- **文字数制限管理**: 単一QR400文字制限、大容量データは自動分割
+- **テストテキスト生成**: 「テストテキスト生成」で特定文字数のサンプルテキストを生成
+- **ヘルプ・技術情報**: 「ヘルプ・技術情報」タブで詳細なドキュメントにアクセス
+- **PWAインストール**: デバイスのホーム画面にアプリをインストールしてクイックアクセス
+
+## プロジェクト構造
 
 ```
 qrconnect/
 ├── app/
-│   ├── page.tsx              # Main entry point
-│   ├── globals.css           # Global styles
-│   └── layout.tsx            # Root layout
+│   ├── page.tsx              # PWAインストールプロンプト付きメインエントリーポイント
+│   ├── globals.css           # グローバルスタイル
+│   └── layout.tsx            # PWAメタデータ付きルートレイアウト
 ├── components/
-│   ├── DeviceDetector.tsx    # Device detection logic
-│   ├── MobileApp.tsx         # Mobile app wrapper
-│   ├── QRGenerator.tsx       # QR code generation
-│   ├── QRReader.tsx          # QR code reading
-│   ├── QRCodeModal.tsx       # QR code expansion modal
-│   └── InfoPage.tsx          # Help and technical info
+│   ├── DeviceDetector.tsx    # デバイス検出ロジック
+│   ├── MobileApp.tsx         # タブ付きモバイルアプリラッパー
+│   ├── QRGenerator.tsx       # 分割対応QRコード生成
+│   ├── QRReader.tsx          # マルチQR対応QRコード読み取り
+│   ├── QRCodeModal.tsx       # QRコード拡大モーダル
+│   ├── InfoPage.tsx          # ヘルプ・技術情報
+│   └── PWAInstallPrompt.tsx  # スマートPWAインストールプロンプト
 ├── utils/
-│   └── testTextGenerator.ts  # Test text generation utilities
+│   ├── testTextGenerator.ts  # テストテキスト生成ユーティリティ
+│   └── dataSplitter.ts       # データ分割・再構築ロジック
 ├── public/
-│   ├── manifest.json         # PWA manifest
-│   └── sw.js                 # Service worker
-└── next.config.ts            # Next.js configuration
+│   ├── manifest.json         # 包括的PWAマニフェスト
+│   ├── sw.js                 # 自動生成Service Worker
+│   ├── browserconfig.xml     # Windowsタイル設定
+│   └── icons/                # PWAアイコン（SVG形式）
+└── next.config.ts            # Next.js + PWA設定
 ```
 
-## PWA Configuration
+## PWA設定
 
-The app is configured as a Progressive Web App with:
-- **Manifest**: Defines app metadata and installation behavior
-- **Service Worker**: Enables offline functionality and caching
-- **Responsive Design**: Optimized for both mobile and desktop installation
+アプリは包括的なプログレッシブウェブアプリとして設定されています：
 
-## Browser Support
+### マニフェスト機能
+- **多言語サポート**: 日本語・英語メタデータ
+- **アイコン**: スケーラブルSVGアイコン（192x192、512x512）
+- **ショートカット**: 主要機能へのクイックアクセス
+- **カテゴリ**: 生産性・ユーティリティとして分類
+- **表示モード**: スタンドアロンアプリ体験
 
-- **Mobile**: iOS Safari, Android Chrome, Firefox Mobile
-- **Desktop**: Chrome, Firefox, Safari, Edge
-- **Camera Access**: Required for QR code scanning on desktop
+### Service Worker機能
+- **オフラインサポート**: 完全なオフライン機能
+- **スマートキャッシュ**: リソースタイプ別の異なる戦略
+- **バックグラウンド同期**: 信頼性の高いデータ処理
+- **自動更新**: シームレスなアプリ更新
 
-## Contributing
+### インストール機能
+- **スマートプロンプト**: コンテキスト対応のインストール提案
+- **クロスプラットフォーム**: iOS SafariとAndroid Chromeサポート
+- **ネイティブ感**: スタンドアロンアプリ体験
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 文字数制限と分割ロジック
 
-## License
+### 単一QRモード
+- **制限**: 400文字（日本語テキスト最適化）
+- **エンコーディング**: エラー訂正レベルMのUTF-8
+- **用途**: 短いメッセージ、URL、連絡先情報
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### 分割QRモード
+- **チャンクサイズ**: QRコード1つあたり400文字
+- **メタデータ**: チャンクあたり14文字（インデックス、合計、チェックサム）
+- **総容量**: 無制限（6000文字以上でテスト済み）
+- **再構築**: データ整合性確認付き自動処理
 
-## Acknowledgments
+### 日本語テキスト最適化
+- **文字密度**: 日本語文字の複雑さに最適化
+- **バイト効率**: 3バイトUTF-8エンコーディングを考慮
+- **QR可読性**: カメラスキャンの信頼性とのバランス
 
-- Built with [Next.js](https://nextjs.org/)
-- QR code generation powered by [qrcode](https://github.com/soldair/node-qrcode)
-- QR code reading powered by [ZXing](https://github.com/zxing-js/library)
-- Styled with [Tailwind CSS](https://tailwindcss.com/)
+## ブラウザサポート
+
+### モバイルブラウザ
+- **iOS Safari**: ホーム画面インストール付き完全PWAサポート
+- **Android Chrome**: 完全なPWA機能
+- **Firefox Mobile**: カメラアクセスとQR生成
+- **Samsung Internet**: 完全互換性
+
+### デスクトップブラウザ
+- **Chrome**: 完全なカメラアクセスとPWAインストール
+- **Firefox**: 完全機能
+- **Safari**: QR読み取りとPWAサポート
+- **Edge**: 完全機能サポート
+
+### 要件
+- **カメラアクセス**: デスクトップでのQRコードスキャンに必要
+- **JavaScript**: モダンES6+サポート必要
+- **ローカルストレージ**: PWAインストール設定用
+
+## 開発
+
+### ビルドコマンド
+```bash
+# 開発サーバー
+npm run dev
+
+# プロダクションビルド
+npm run build
+
+# プロダクションサーバー起動
+npm start
+
+# コードリント
+npm run lint
+```
+
+### 環境セットアップ
+- TypeScript設定済み
+- ESLintルール設定済み
+- Tailwind CSS設定済み
+- PWA Service Worker自動生成
+
+## パフォーマンス
+
+### 最適化機能
+- **静的生成**: 高速読み込み用の事前レンダリングページ
+- **画像最適化**: 自動画像圧縮・サイズ調整
+- **コード分割**: 効率的なバンドル読み込み
+- **キャッシュ戦略**: 最適パフォーマンス用の多層キャッシュ
+
+### バンドル分析
+- メインバンドル: 約238KB（QRライブラリ含む）
+- First Load JS: 約101KB共有
+- PWAアセット: オフライン用キャッシュ
+
+## コントリビューション
+
+1. リポジトリをフォーク
+2. フィーチャーブランチを作成（`git checkout -b feature/amazing-feature`）
+3. TypeScript・ESLint規約に従う
+4. モバイル・デスクトップ両方の機能をテスト
+5. PWAインストールが動作することを確認
+6. 変更をコミット（`git commit -m 'Add some amazing feature'`）
+7. ブランチにプッシュ（`git push origin feature/amazing-feature`）
+8. プルリクエストを開く
+
+### 開発ガイドライン
+- レスポンシブデザイン原則を維持
+- 様々な文字数・言語でテスト
+- PWA機能が維持されることを確認
+- 既存のコードパターンに従って一貫性を保つ
+
+## ライセンス
+
+このプロジェクトはMITライセンスの下でライセンスされています。詳細は[LICENSE](LICENSE)ファイルをご覧ください。
+
+## 謝辞
+
+- [Next.js](https://nextjs.org/)で構築
+- QRコード生成は[qrcode](https://github.com/soldair/node-qrcode)により提供
+- QRコード読み取りは[ZXing](https://github.com/zxing-js/library)により提供
+- [Tailwind CSS](https://tailwindcss.com/)でスタイリング
+- PWA機能は[next-pwa](https://github.com/shadowwalker/next-pwa)により提供
+- QRコード視認性最適化のためのカスタムデザインアイコン・UIコンポーネント
+
+## ロードマップ
+
+### 予定機能
+- [ ] バッチQRコード生成
+- [ ] QRコードスタイリングオプション
+- [ ] QRコードの画像エクスポート
+- [ ] 大容量ペイロード用データ圧縮
+- [ ] 暗号化データ転送オプション
+- [ ] マルチ言語UI対応
+- [ ] QRコード履歴・お気に入り機能
+
+## トラブルシューティング
+
+### よくある問題
+
+**Q: QRコードが生成されない**
+A: テキスト入力後、少し待ってください。400文字を超える場合は自動的に分割モードに切り替わります。
+
+**Q: カメラでQRコードを読み取れない**
+A: 照明を明るくし、QRコードにカメラを近づけて、画面が安定するまで待ってください。
+
+**Q: 分割QRの順序が分からない**
+A: 各QRコードには「1/4」のようなインデックスが表示されます。順番通りにスキャンしてください。
+
+**Q: PWAインストールができない**
+A: ブラウザがPWAをサポートしているか確認し、HTTPSで接続していることを確認してください。
+
+### サポート
+
+問題が発生した場合は、[GitHub Issues](https://github.com/yourusername/qrconnect/issues)で報告してください。

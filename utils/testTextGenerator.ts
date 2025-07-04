@@ -123,51 +123,45 @@ export const testTextOptions: TestTextOption[] = [
     expectedLength: 100
   },
   {
-    name: "中程度のテキスト (500文字)",
-    description: "一般的な使用範囲のテスト",
-    generator: () => generateMixedText(500),
-    expectedLength: 500
+    name: "単一QR限界 (400文字)",
+    description: "1つのQRコードで送信可能な最大サイズ（日本語対応）",
+    generator: () => generatePracticalData(400),
+    expectedLength: 400
   },
   {
-    name: "大きなテキスト (1000文字)",
-    description: "大容量データのテスト",
-    generator: () => generatePracticalData(1000),
-    expectedLength: 1000
+    name: "分割送信 2分割 (800文字)",
+    description: "分割送信モードのテスト（2つのQRコード）",
+    generator: () => generateMixedText(800),
+    expectedLength: 800
   },
   {
-    name: "制限近く (1800文字)",
-    description: "日本語制限に近いサイズ",
-    generator: () => generateJapaneseText(1800),
-    expectedLength: 1800
+    name: "分割送信 4分割 (1500文字)",
+    description: "分割送信モードのテスト（4つのQRコード）",
+    generator: () => generateJapaneseText(1500),
+    expectedLength: 1500
   },
   {
-    name: "推奨制限 (2000文字)",
-    description: "推奨制限ちょうどのサイズ",
-    generator: () => generateAlphanumericText(2000),
-    expectedLength: 2000
+    name: "分割送信 7分割 (2700文字)",
+    description: "大容量分割送信のテスト（7つのQRコード）",
+    generator: () => generateAlphanumericText(2700),
+    expectedLength: 2700
   },
   {
-    name: "制限超過 (2500文字)",
-    description: "制限を超えたサイズ（エラーテスト）",
-    generator: () => generateMixedText(2500),
-    expectedLength: 2500
+    name: "長文記事 (6000文字)",
+    description: "記事やドキュメント送信のテスト",
+    generator: () => generateMixedText(6000),
+    expectedLength: 6000
   },
   {
-    name: "英数字のみ (3000文字)",
-    description: "英数字の高容量テスト",
-    generator: () => generateAlphanumericText(3000),
-    expectedLength: 3000
-  },
-  {
-    name: "実用データ形式",
+    name: "実用データ形式 (800文字)",
     description: "vCard、WiFi、JSON形式のデータ",
     generator: () => generatePracticalData(800),
     expectedLength: 800
   },
   {
-    name: "URL形式",
-    description: "長いURLのテスト",
+    name: "長いURL (411文字)",
+    description: "パラメータが多い長いURLのテスト",
     generator: () => `https://example.com/very/long/path/to/resource?param1=value1&param2=value2&param3=とても長いパラメータ値&param4=another_long_parameter_value&timestamp=${Date.now()}&session_id=abcd1234efgh5678ijkl9012mnop3456&user_id=user_123456789&callback_url=https://callback.example.com/success&error_url=https://callback.example.com/error&data=${encodeURIComponent('日本語データのテスト')}`,
-    expectedLength: 400
+    expectedLength: 411
   }
 ];
