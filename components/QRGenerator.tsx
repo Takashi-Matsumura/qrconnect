@@ -498,6 +498,9 @@ export default function QRGenerator({ className = '' }: QRGeneratorProps) {
         qrCodeUrl={qrCodeUrl}
         textLength={text.length}
         qrSize={calculateQRSize(text.length)}
+        allQRUrls={allQRUrls}
+        isSplitMode={isSplitMode}
+        totalChunks={multiQRManager.getTotalChunks()}
       />
     </div>
   );
