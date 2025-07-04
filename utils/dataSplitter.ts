@@ -55,8 +55,8 @@ export function encodeChunk(chunk: QRChunk): string {
 
 // QRコード文字列をチャンクにデコード
 export function decodeChunk(qrData: string): QRChunk | null {
-  // 分割データの形式チェック
-  const splitMatch = qrData.match(/^\[(\d+)\/(\d+):([a-f0-9]+)\](.*)$/);
+  // 分割データの形式チェック（改行文字対応のため[\s\S]を使用）
+  const splitMatch = qrData.match(/^\[(\d+)\/(\d+):([a-f0-9]+)\]([\s\S]*)$/);
   
   if (splitMatch) {
     const [, indexStr, totalStr, checksum, data] = splitMatch;
@@ -65,7 +65,6 @@ export function decodeChunk(qrData: string): QRChunk | null {
     
     // チェックサム検証
     if (generateChecksum(data) !== checksum) {
-      console.warn('チェックサムが一致しません');
       return null;
     }
     
@@ -151,6 +150,11 @@ export class MultiQRManager {
     return this.chunks.length > 0 ? this.chunks[0].total : 0;
   }
   
+  // 受信用：受信済みチャンクのインデックス一覧を取得
+  getReceivedChunkIndices(): number[] {
+    return Array.from(this.receivedChunks.keys());
+  }
+
   // 受信用：チャンクを追加
   addReceivedChunk(chunk: QRChunk): boolean {
     // 既に受信済みかチェック

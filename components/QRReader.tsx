@@ -25,6 +25,7 @@ export default function QRReader({ className = '' }: QRReaderProps) {
   const [continuousMode, setContinuousMode] = useState(false);
   const [lastReceiveTime, setLastReceiveTime] = useState<number>(0);
   const [duplicateCount, setDuplicateCount] = useState<number>(0);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -37,6 +38,12 @@ export default function QRReader({ className = '' }: QRReaderProps) {
   // QRコード読み取り結果を処理
   const handleQRResult = (qrData: string) => {
     const currentTime = Date.now();
+    
+    // 処理中の場合は読み取りをスキップ（連続読み取り対策）
+    if (isProcessing) {
+      return;
+    }
+    
     const chunk = decodeChunk(qrData);
     
     if (!chunk) {
@@ -44,69 +51,91 @@ export default function QRReader({ className = '' }: QRReaderProps) {
       return;
     }
     
-    // 単一チャンクの場合（分割なし）
-    if (chunk.total === 1) {
-      setScannedText(chunk.data);
-      setIsScanning(false);
-      setContinuousMode(false);
-      if (readerRef.current) {
-        readerRef.current.reset();
-      }
-      return;
-    }
-    
-    // 分割チャンクの場合
-    setIsMultiMode(true);
-    setContinuousMode(true);
-    
-    // 重複チェック：同じチャンクを短時間で複数回受信した場合
-    if (receivedChunks.has(chunk.index)) {
-      setDuplicateCount(prev => prev + 1);
-      console.log(`重複受信: チャンク${chunk.index} (${duplicateCount + 1}回目)`);
-      return; // 重複の場合は処理をスキップ
-    }
-    
-    const isNewChunk = multiQRManager.addReceivedChunk(chunk);
-    if (isNewChunk) {
-      const newReceivedChunks = new Set(receivedChunks);
-      newReceivedChunks.add(chunk.index);
-      setReceivedChunks(newReceivedChunks);
-      setLastReceiveTime(currentTime);
+    // 分割チャンクの場合（total > 1）
+    if (chunk.total > 1) {
+      // 分割モードが開始されていない場合、または異なるセッションの場合は初期化
+      const currentStatus = multiQRManager.getReceiveStatus();
+      const isDifferentSession = currentStatus.total > 0 && currentStatus.total !== chunk.total;
+      const isFirstChunk = !isMultiMode && currentStatus.total === 0;
       
-      console.log(`新規チャンク受信: ${chunk.index}/${chunk.total}`);
-      
-      const status = multiQRManager.getReceiveStatus();
-      setReceiveStatus(status);
-      
-      // 受信成功のフィードバック（簡易的な音声フィードバック）
-      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance('受信');
-        utterance.volume = 0.3;
-        utterance.rate = 2;
-        speechSynthesis.speak(utterance);
-      }
-      
-      // 全チャンク受信完了
-      if (status.complete) {
-        const combinedData = multiQRManager.getCombinedData();
-        if (combinedData) {
-          setScannedText(combinedData);
-          setIsScanning(false);
-          setContinuousMode(false);
-          
-          // 完了通知
-          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance('受信完了');
-            utterance.volume = 0.5;
-            speechSynthesis.speak(utterance);
-          }
-          
-          if (readerRef.current) {
-            readerRef.current.reset();
-          }
+      if (isFirstChunk || isDifferentSession) {
+        setIsMultiMode(true);
+        setContinuousMode(true);
+        
+        // 初回またはセッション変更の場合のみリセット
+        if (isFirstChunk || isDifferentSession) {
+          setReceivedChunks(new Set());
+          setReceiveStatus({ received: 0, total: chunk.total, complete: false });
+          multiQRManager.reset();
         }
       }
-      // 分割モードでは受信完了まで継続スキャン（停止しない）
+      
+      const isNewChunk = multiQRManager.addReceivedChunk(chunk);
+      if (!isNewChunk) {
+        // 重複受信の場合
+        setDuplicateCount(prev => prev + 1);
+        return; // 重複の場合は処理をスキップ（スキャンは継続）
+      }
+      
+      if (isNewChunk) {
+        // 新しいチャンク受信時の処理ブロック開始
+        setIsProcessing(true);
+        
+        // multiQRManagerから受信済みチャンクを取得
+        const status = multiQRManager.getReceiveStatus();
+        const receivedChunkIndices = multiQRManager.getReceivedChunkIndices();
+        
+        setReceivedChunks(new Set(receivedChunkIndices));
+        setLastReceiveTime(currentTime);
+        setReceiveStatus(status);
+        
+        // 受信成功のフィードバック（簡易的な音声フィードバック）
+        if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance('受信');
+          utterance.volume = 0.3;
+          utterance.rate = 2;
+          speechSynthesis.speak(utterance);
+        }
+        
+        // 全チャンク受信完了時のみスキャンを停止
+        if (status.complete) {
+          const combinedData = multiQRManager.getCombinedData();
+          if (combinedData) {
+            setScannedText(combinedData);
+            setIsScanning(false);
+            setContinuousMode(false);
+            setIsProcessing(false);
+            
+            // 完了通知
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+              const utterance = new SpeechSynthesisUtterance('受信完了');
+              utterance.volume = 0.5;
+              speechSynthesis.speak(utterance);
+            }
+            
+            if (readerRef.current) {
+              readerRef.current.reset();
+            }
+          } else {
+            setIsProcessing(false);
+          }
+        } else {
+          // まだ未完了の場合：短時間の処理クールダウン後にスキャンを継続
+          // 1.5秒のクールダウンでカメラの新しいQRコード検出を促進
+          setTimeout(() => {
+            setIsProcessing(false);
+          }, 1500);
+        }
+      }
+      return; // 分割チャンクの場合はここで処理終了（スキャン継続）
+    }
+    
+    // 単一チャンクの場合（total === 1）- 完全なデータとして扱う
+    setScannedText(chunk.data);
+    setIsScanning(false);
+    setContinuousMode(false);
+    if (readerRef.current) {
+      readerRef.current.reset();
     }
   };
 
@@ -127,8 +156,10 @@ export default function QRReader({ className = '' }: QRReaderProps) {
       
       codeReader.decodeFromVideoDevice(selectedDeviceId, videoRef.current!, (result, error) => {
         if (result) {
-          handleQRResult(result.getText());
+          const qrText = result.getText();
+          handleQRResult(qrText);
         }
+        
         if (error && error.name !== 'NotFoundException') {
           console.error('QRコード読み取りエラー:', error);
         }
@@ -156,6 +187,7 @@ export default function QRReader({ className = '' }: QRReaderProps) {
     setReceivedChunks(new Set());
     setLastReceiveTime(0);
     setDuplicateCount(0);
+    setIsProcessing(false);
     multiQRManager.reset();
   };
 

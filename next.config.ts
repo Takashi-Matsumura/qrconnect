@@ -4,6 +4,7 @@ const withPWA = require("next-pwa");
 
 const nextConfig: NextConfig = {
   /* config options here */
+  reactStrictMode: true,
 };
 
 export default withPWA({

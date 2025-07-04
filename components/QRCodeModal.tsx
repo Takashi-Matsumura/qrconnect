@@ -35,11 +35,24 @@ export default function QRCodeModal({
   // 自動ループ再生のタイマー
   useEffect(() => {
     if (isOpen && isSplitMode && autoPlay && qrUrls.length > 1) {
+      console.log('🔄 自動ループ開始:', { 
+        currentIndex, 
+        totalQRs: qrUrls.length, 
+        playSpeed 
+      });
+      
       const interval = setInterval(() => {
-        setCurrentIndex(prev => (prev + 1) % qrUrls.length);
+        setCurrentIndex(prev => {
+          const nextIndex = (prev + 1) % qrUrls.length;
+          console.log(`🔄 QR切り替え: ${prev} → ${nextIndex}`);
+          return nextIndex;
+        });
       }, playSpeed);
       
-      return () => clearInterval(interval);
+      return () => {
+        console.log('🔄 自動ループ停止');
+        clearInterval(interval);
+      };
     }
   }, [isOpen, isSplitMode, autoPlay, qrUrls.length, playSpeed]);
 

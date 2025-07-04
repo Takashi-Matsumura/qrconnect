@@ -35,8 +35,9 @@ export default function InfoPage({ className = '' }: InfoPageProps) {
                 <li>• 同じURLをPCブラウザで開く</li>
                 <li>• 自動的にカメラが起動</li>
                 <li>• 単一QR：1つのQRコードをスキャン</li>
-                <li>• 分割QR：順番に全てのQRコードをスキャン</li>
-                <li>• データが自動的に結合・表示される</li>
+                <li>• 分割QR：任意の順序で全てのQRコードをスキャン</li>
+                <li>• 重複スキャンは自動的にスキップされる</li>
+                <li>• データが自動的に正しい順序で結合・表示される</li>
               </ul>
             </div>
           </div>
@@ -106,8 +107,9 @@ export default function InfoPage({ className = '' }: InfoPageProps) {
               <h4 className="font-medium mb-1">受信側（PC）</h4>
               <ul className="space-y-1 ml-4">
                 <li>• 受信進捗の自動表示：「2/4受信済み」</li>
-                <li>• 順序に関係なくスキャン可能</li>
-                <li>• 全チャンク受信後、自動データ結合</li>
+                <li>• 任意の順序でスキャン可能（1→2→3→4でも4→2→1→3でも可能）</li>
+                <li>• 重複スキャンの自動検出・スキップ</li>
+                <li>• 全チャンク受信後、自動的に正しい順序でデータ結合</li>
                 <li>• エラー時は受信状況をリセット</li>
               </ul>
             </div>
@@ -266,8 +268,9 @@ export default function InfoPage({ className = '' }: InfoPageProps) {
             <div>
               <h4 className="font-medium mb-1">分割QR関連の問題</h4>
               <ul className="space-y-1 ml-4">
-                <li>• 順序確認：各QRコードの「1/4」表示をチェック</li>
+                <li>• 順序確認：各QRコードの「1/4」表示をチェック（任意順でスキャン可能）</li>
                 <li>• 受信進捗：PC側で「2/4受信済み」を確認</li>
+                <li>• 重複スキャン：同じチャンクを複数回スキャンしても自動的にスキップ</li>
                 <li>• データ不整合：受信をリセットして再開</li>
                 <li>• 分割モード終了：「分割モード終了」ボタンを使用</li>
               </ul>
